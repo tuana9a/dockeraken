@@ -1,0 +1,3 @@
+[default]
+dockeraken_id=any-string-id
+transport_url=amqps://username:password@rabbitmq.example.com/vhost

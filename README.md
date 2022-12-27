@@ -2,21 +2,35 @@
 
 Simple Docker Agent run jobs
 
-## package
+## how to setup (**python >= 3.8**)
 
 ```bash
-python setup.py sdist
+mkdir /opt/dockeraken
 ```
 
-## systemd-service
+```bash
+python3 -m venv .venv
+```
 
-`/etc/systemd/system/dockerakend.service`
+```bash
+source .venv/bin/activate
+```
 
-```conf
+```bash
+pip install git+https://github.com/tuana9a/dockeraken
+```
+
+create service file `/etc/systemd/system/dockerakend.service`
+
+```ini
+[Unit]
+Description=Dockeraken Daemon
+
 [Service]
-Environment="PYTHONUNBUFFERED=1"
-ExecStart=/opt/dockerakend/.venv/bin/dockerakend
+ExecStart=/opt/dockeraken/.venv/bin/dockerakend --config /your/path/to/dockeraken.ini
 
 [Install]
 WantedBy=default.target
 ```
+
+config example see `dockeraken.ini.example`

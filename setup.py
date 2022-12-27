@@ -6,7 +6,9 @@ setuptools.setup(name="dockeraken",
                  author="Tuan Nguyen Minh",
                  author_email="tuana9a@gmail.com",
                  entry_points={
-                     "console_scripts":
-                     ["dockerakend=dockeraken.cmd.daemon:main"]
+                     "console_scripts": [
+                         "dockerakend=dockeraken.cmd.daemon:main",
+                         "dockeraken-tools=dockeraken.cmd.tools:main"
+                     ]
                  },
                  install_requires=["docker>=5.0.3", "pika>=1.2.0"])

@@ -1,51 +1,49 @@
 """
-Me borrow some code from OpenStack Trove
-For more details, see: https://opendev.org/openstack/trove
+Origin code from OpenStack https://opendev.org/openstack/trove
 """
 
 import docker
+import logging
 
+from typing import Any, Optional
 from dockeraken.configs import cfg
-from typing import Any, Union, Optional
 
 
 class DockerUtils():
-    _docker_client: docker.DockerClient
+    __docker_client: docker.DockerClient
 
-    def __init__(self):
+    def __init__(self, docker_client: docker.DockerClient = docker.from_env()):
+        self.__docker_client = docker_client
         pass
 
     @property
     def client(self):
-        if self._docker_client:
-            return self._docker_client
+        return self.__docker_client
 
-        self._docker_client = docker.from_env()
-        return self._docker_client
-
-    def login(self, container_registry, username, password):
+    def login(self, container_registry, username, password, **kwargs):
         self.client.login(username, password, registry=container_registry)
 
-    def list_containers(self):
-        return self.client.containers.list()
+    def list_containers(self, all: bool = True, **kwargs):
+        return self.client.containers.list(all=all)
 
-    def stop_container(
-            self,
-            name: str,
-            timeout=cfg.default_stop_container_timeout_in_seconds):
+    def stop_container(self,
+                       name: str,
+                       timeout=cfg.stop_container_timeout_in_seconds,
+                       **kwargs):
         container: Any = self.client.containers.get(name)
         container.stop(timeout=timeout)
 
     def start_container(self,
-                        image,
                         name: str,
+                        image=None,
                         restart_policy="unless-stopped",
                         volumes={},
                         ports={},
                         user="",
                         network_mode="host",
                         environment={},
-                        command=""):
+                        command="",
+                        **kwargs):
         """Start a docker container.
 
         :param image: docker image.
@@ -83,14 +81,15 @@ class DockerUtils():
     def run_container(self,
                       image: str,
                       name: Optional[str],
-                      network=None,
-                      network_mode: Optional[str] = "host",
+                      network="bridge",
+                      network_mode: Optional[str] = "bridge",
                       user="",
                       volumes={},
                       environment={},
                       command="",
                       detach=True,
-                      remove=False):
+                      remove=False,
+                      **kwargs):
         """Run command in a container and return the string output list.
 
         :param image: docker image.
@@ -109,23 +108,29 @@ class DockerUtils():
         except docker.errors.NotFound:  # type: ignore
             pass
 
-        kwargs: dict = {
-            "name": name,
-            "volumes": volumes,
-            "remove": remove,
-            "command": command,
-            "user": user,
-            "detach": detach,
-            "environment": environment
-        }
-
         # network param is incompatible with network_mode
         if network:
-            kwargs["network"] = network
+            container = self.client.containers.run(
+                image,
+                name=name,
+                volumes=volumes,
+                environment=environment,
+                network=network,
+                user=user,
+                command=command,
+                detach=detach,
+            )
         else:
-            kwargs["network_mode"] = network_mode
-
-        container = self.client.containers.run(image, **kwargs)
+            container = self.client.containers.run(
+                image,
+                name=name,
+                volumes=volumes,
+                environment=environment,
+                network_mode=network_mode,
+                user=user,
+                command=command,
+                detach=detach,
+            )
 
         # need reload to get container info
         # because of detach=True
@@ -134,35 +139,34 @@ class DockerUtils():
 
         return container
 
-    def restart_container(
-            self,
-            name,
-            timeout=cfg.default_stop_container_timeout_in_seconds):
+    def restart_container(self,
+                          name,
+                          timeout=cfg.stop_container_timeout_in_seconds,
+                          **kwargs):
         container: Any = self.client.containers.get(name)
         container.restart(timeout=timeout)
 
-    def remove_container(self, name):
+    def remove_container(self, name, **kwargs):
         try:
             container: Any = self.client.containers.get(name)
             container.remove(force=True)
         except docker.errors.NotFound:  # type: ignore
             pass
 
-    def prune_images(self):
+    def prune_images(self, **kwargs):
         """Remove unused images."""
         self.client.images.prune(filters={"dangling": False})
 
-    def create_network(self, name, driver="bridge", opts=None):
+    def create_network(self, name, driver="bridge", opts=None, **kwargs):
         return self.client.networks.create(name, driver, opts)
 
-    def get_container_ip(self, name, network=None):
+    def get_container_ip(self, name, index=0, network=None, **kwargs):
         container: Any = self.client.containers.get(name)
         network_settings = container.attrs["NetworkSettings"]["Networks"]
-        print(network_settings)
 
         if network:
             return network_settings[network]["IPAddress"]
 
-        first_network = list(network_settings.keys())[0]
+        first_network = list(network_settings.keys())[index]
 
         return network_settings[first_network]["IPAddress"]

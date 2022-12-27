@@ -1,15 +1,16 @@
-import dotenv
 import multiprocessing
-
-dotenv.load_dotenv()
 
 cpu_count = multiprocessing.cpu_count()
 max_thread_pool_size = 8
-min_thread_pool_size = 1
-default_thread_pool_size = min(max(cpu_count, 1), 8)
-
-# bash
-default_process_timeout_in_seconds = 30
+min_thread_pool_size = 2
+thread_pool_size = min(max(cpu_count, min_thread_pool_size),
+                       max_thread_pool_size)
 
 # docker
-default_stop_container_timeout_in_seconds = 3 * 60
+stop_container_timeout_in_seconds = 3 * 60
+
+# rabbitmq connection string
+transport_url: str = ""
+
+# setup id
+dockeraken_id: str = ""

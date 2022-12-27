@@ -9,4 +9,4 @@ setuptools.setup(name="dockeraken",
                      "console_scripts":
                      ["dockerakend=dockeraken.cmd.daemon:main"]
                  },
-                 install_requires=["docker==5.0.3", "python-dotenv==0.19.2"])
+                 install_requires=["docker>=5.0.3", "pika>=1.2.0"])

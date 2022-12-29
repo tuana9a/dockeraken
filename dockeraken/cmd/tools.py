@@ -8,11 +8,9 @@ parser.add_argument("which",
                     choices=["gen_config", "gen-config"],
                     type=str)
 
-config_template = """
-[default]
+config_template = """[default]
 dockeraken_id={id}
-transport_url=amqps://username:password@rabbitmq.example.com/vhost
-"""
+transport_url=amqps://username:password@rabbitmq.example.com/vhost"""
 
 
 def main():

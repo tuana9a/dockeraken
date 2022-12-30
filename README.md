@@ -9,6 +9,10 @@ mkdir /opt/dockeraken
 ```
 
 ```bash
+cd /opt/dockeraken
+```
+
+```bash
 python3 -m venv .venv
 ```
 
@@ -27,7 +31,7 @@ create service file `/etc/systemd/system/dockerakend.service`
 Description=Dockeraken Daemon
 
 [Service]
-ExecStart=/opt/dockeraken/.venv/bin/dockerakend --config /your/path/to/dockeraken.ini
+ExecStart=/opt/dockeraken/.venv/bin/dockerakend --config /opt/dockeraken/dockeraken.ini
 
 [Install]
 WantedBy=default.target

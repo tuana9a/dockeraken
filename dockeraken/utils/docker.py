@@ -160,6 +160,10 @@ class DockerUtils():
     def create_network(self, name, driver="bridge", opts=None, **kwargs):
         return self.client.networks.create(name, driver, opts)
 
+    def inspect_container(self, name, **kwargs):
+        container: Any = self.client.containers.get(name)
+        return container.attrs
+
     def get_container_ip(self, name, index=0, network=None, **kwargs):
         container: Any = self.client.containers.get(name)
         network_settings = container.attrs["NetworkSettings"]["Networks"]

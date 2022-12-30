@@ -87,15 +87,7 @@ def main():
                     all=True)
 
                 for e in raw_containers:
-                    c = {
-                        "id": e.id,
-                        "short_id": e.short_id,
-                        "name": e.name,
-                        "image": {
-                            "tags": e.image.tags,
-                        },
-                        "status": e.status,
-                    }
+                    c = docker_utils.inspect_container(e.name)
                     current_containers.append(c)
                 payload = {
                     "dockeraken_id": cfg.dockeraken_id,

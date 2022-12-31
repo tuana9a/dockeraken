@@ -61,8 +61,8 @@ def main():
         channel = conn.channel()
         channel.exchange_declare(exchname.available_methods,
                                  exchange_type="fanout")
-        try:
-            while not stop:
+        while not stop:
+            try:
                 payload = {
                     "dockeraken_id": cfg.dockeraken_id,
                     "available_methods": available_methods
@@ -72,16 +72,16 @@ def main():
                                       routing_key="",
                                       body=json.dumps(payload))
                 time.sleep(3)
-        except Exception as e:
-            logging.error(traceback.format_exc())
+            except Exception as e:
+                logging.error(traceback.format_exc())
 
     def send_current_containers():
         conn = pika.BlockingConnection(pika.URLParameters(cfg.transport_url))
         channel = conn.channel()
         channel.exchange_declare(exchname.current_containers,
                                  exchange_type="fanout")
-        try:
-            while not stop:
+        while not stop:
+            try:
                 current_containers = []
                 raw_containers: List[Any] = docker_utils.list_containers(
                     all=True)
@@ -98,8 +98,8 @@ def main():
                                       routing_key="",
                                       body=json.dumps(payload))
                 time.sleep(3)
-        except Exception as e:
-            logging.error(traceback.format_exc())
+            except Exception as e:
+                logging.error(traceback.format_exc())
 
     threading.Thread(target=send_available_methods).start()
     threading.Thread(target=send_current_containers).start()

@@ -4,6 +4,7 @@ Origin code from OpenStack https://opendev.org/openstack/trove
 
 import docker
 import logging
+import traceback
 
 from typing import Any, Optional
 from dockeraken.configs import cfg
@@ -33,17 +34,7 @@ class DockerUtils():
         container: Any = self.client.containers.get(name)
         container.stop(timeout=timeout)
 
-    def start_container(self,
-                        name: str,
-                        image=None,
-                        restart_policy="unless-stopped",
-                        volumes={},
-                        ports={},
-                        user="",
-                        network_mode="host",
-                        environment={},
-                        command="",
-                        **kwargs):
+    def start_container(self, name: str, **kwargs):
         """Start a docker container.
 
         :param image: docker image.
@@ -59,22 +50,12 @@ class DockerUtils():
         :param command:
         :return:
         """
+        container: Any = None
         try:
-            container: Any = self.client.containers.get(name)
+            container = self.client.containers.get(name)
             container.start()
-        except docker.errors.NotFound:  # type: ignore
-            container = self.client.containers.run(
-                image,
-                name=name,
-                restart_policy={"Name": restart_policy},
-                privileged=False,
-                network_mode=network_mode,
-                detach=True,
-                volumes=volumes,
-                ports=ports,
-                user=user,
-                environment=environment,
-                command=command)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
         return container
 
@@ -102,11 +83,8 @@ class DockerUtils():
         :param command:
         :return:
         """
-        try:
-            container: Any = self.client.containers.get(name)
-            container.remove(force=True)
-        except docker.errors.NotFound:  # type: ignore
-            pass
+
+        container: Any = None
 
         # network param is incompatible with network_mode
         if network:
@@ -171,6 +149,6 @@ class DockerUtils():
         if network:
             return network_settings[network]["IPAddress"]
 
-        first_network = list(network_settings.keys())[index]
+        which_network = list(network_settings.keys())[index]
 
-        return network_settings[first_network]["IPAddress"]
+        return network_settings[which_network]["IPAddress"]

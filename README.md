@@ -4,6 +4,8 @@ Simple Docker Agent run jobs
 
 ## how to setup (**python >= 3.8**)
 
+config example see `dockeraken.ini.example`
+
 ```bash
 mkdir /opt/dockeraken
 ```
@@ -37,4 +39,12 @@ ExecStart=/opt/dockeraken/.venv/bin/dockerakend --config /opt/dockeraken/dockera
 WantedBy=default.target
 ```
 
-config example see `dockeraken.ini.example`
+```bash
+sudo systemctl daemon-reload
+```
+
+(optional)
+
+```bash
+sudo systemctl enable dockerakend
+```
